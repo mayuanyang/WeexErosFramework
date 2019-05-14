@@ -8,6 +8,7 @@ import android.net.http.SslError;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.JsResult;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
@@ -21,10 +22,17 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
 import com.eros.framework.activity.GlobalWebViewActivity;
+import com.taobao.weex.common.Constants;
+import com.taobao.weex.dom.ImmutableDomObject;
+import com.taobao.weex.dom.WXDomObject;
 import com.taobao.weex.ui.component.WXWeb;
 import com.taobao.weex.ui.view.IWebView;
 import com.taobao.weex.utils.WXLogUtils;
+import com.taobao.weex.utils.WXUtils;
 import com.taobao.weex.utils.WXViewUtils;
+import com.taobao.weex.ui.component.WXComponentProp;
+
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,16 +44,18 @@ import java.util.Map;
 public class BMWXWebView implements IWebView {
 
     private Context mContext;
+    private ImmutableDomObject mDom;
     private WebView mWebView;
     private ProgressBar mProgressBar;
     private boolean mShowLoading = true;
 
     private OnErrorListener mOnErrorListener;
     private OnPageListener mOnPageListener;
+    private String mapData;
 
-
-    public BMWXWebView(Context context) {
+    public BMWXWebView(Context context, ImmutableDomObject dom) {
         mContext = context;
+        mDom = dom;
     }
 
     @Override
@@ -157,6 +167,8 @@ public class BMWXWebView implements IWebView {
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
         addWebJavascriptInterface(wv);
+        addMapData(wv);
+
         wv.setWebViewClient(new WebViewClient() {
 
             @Override
@@ -182,6 +194,9 @@ public class BMWXWebView implements IWebView {
                 if (mOnPageListener != null) {
                     mOnPageListener.onPageFinish(url, view.canGoBack(), view.canGoForward());
                 }
+                //view.loadUrl("javascript:setOptions('" + mapData + "')");
+                //view.reload();
+
             }
 
             @Override
@@ -246,8 +261,16 @@ public class BMWXWebView implements IWebView {
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     private void addWebJavascriptInterface(WebView mWeb) {
         WebSettings settings = mWeb.getSettings();
+        settings.setAllowFileAccessFromFileURLs(true);
         settings.setJavaScriptEnabled(true);
         mWeb.addJavascriptInterface(new GlobalWebViewActivity.JSMethod(mContext), "bmnative");
+    }
+
+    private void addMapData(WebView mWeb) {
+        mapData = WXUtils.getString(mDom.getAttrs().get("mapData"), null);
+        mWeb.addJavascriptInterface(new MapDataJavaScriptInterface(mapData), "mapData");
+
+
     }
 
     private double mContentHeight;
@@ -256,6 +279,19 @@ public class BMWXWebView implements IWebView {
 
     private void evaluateScriptValue() {
         getWebView().loadUrl("javascript:alert(document.body.scrollHeight)");
+    }
+
+    public class MapDataJavaScriptInterface {
+
+        private String _mapData;
+        public MapDataJavaScriptInterface(String mapData) {
+            _mapData = mapData;
+        }
+
+        @JavascriptInterface
+        public String toString() {
+            return _mapData;
+        }
     }
 
 }
