@@ -47,7 +47,7 @@ public class HookWeb extends WXComponent {
     }
 
     protected void createWebView() {
-        mWebView = new BMWXWebView(getContext());
+        mWebView = new BMWXWebView(getContext(), getDomObject());
     }
 
     @Override
