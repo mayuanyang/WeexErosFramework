@@ -154,11 +154,11 @@ public class BMMap extends WXComponent implements IWebView.OnPageListener {
         }
     }
 
-    @JSMethod
-    public void setMapData(String info) {
-        this.mMapData = info;
-        executesetMapData();
-    }
+//    @JSMethod
+//    public void setMapData(String info) {
+//        this.mMapData = info;
+//        executesetMapData();
+//    }
 
 
     @Override

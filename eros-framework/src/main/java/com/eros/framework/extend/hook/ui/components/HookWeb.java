@@ -2,11 +2,23 @@ package com.eros.framework.extend.hook.ui.components;
 
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.webkit.ConsoleMessage;
+import android.webkit.JsResult;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
+import com.eros.framework.BMWXEnvironment;
 import com.eros.framework.manager.impl.FileManager;
 import com.taobao.weex.WXSDKInstance;
 import com.taobao.weex.annotation.Component;
@@ -119,8 +131,20 @@ public class HookWeb extends WXComponent {
         getWebView().setShowLoading(showLoading);
     }
 
+    private String info;
+
+    @WXComponentProp(name = "mapData")
+    public void setMapData(String info) {
+
+        this.info = info;
+
+        fireEvent("finish");
+        Log.e("info", info);
+    }
+
     @WXComponentProp(name = Constants.Name.SRC)
     public void setUrl(String url) {
+        Log.e("setUrl", "setUrl");
         if (TextUtils.isEmpty(url) || getHostView() == null) {
             return;
         }
@@ -130,11 +154,64 @@ public class HookWeb extends WXComponent {
                 String mUrl = "file://" + localPath(ul);
                 loadUrl(mUrl);
             } else {
+                BMWXWebView webView = (BMWXWebView) mWebView;
+                WebSettings settings = webView.getWebView().getSettings();
+
+                settings.setJavaScriptEnabled(true);
+                settings.setAllowFileAccess(true);
+                settings.setDomStorageEnabled(true);
+                //   webView.getWebView().setWebViewClient(new WebViewClient());
+                webView.getWebView().setWebViewClient(new WebViewClient() {
+                    @Override
+                    public void onPageStarted(WebView view, String url, Bitmap favicon) {
+
+                        super.onPageStarted(view, url, favicon);
+
+
+                    }
+
+                    @Override
+                    public void onPageCommitVisible(WebView view, String url) {
+
+                        super.onPageCommitVisible(view, url);
+                    }
+
+                    @Override
+                    public void onPageFinished(WebView view, String url) {
+
+                        super.onPageFinished(view, url);
+                        if (!TextUtils.isEmpty(info)) {
+                            loadUrl("javascript:setOptions(" + info + ")");
+                        }
+
+                    }
+                });
                 loadUrl(ul.toString());
+
             }
         }
     }
 
+    private static final String INSIDE_URL = "file:///android_asset/direction.html";
+
+
+    private String getUrl(String url) {
+        return TextUtils.isEmpty(url) ? "" : getAssetsPath(url);
+    }
+
+    private String getAssetsPath(String path) {
+        Uri uri = Uri.parse(path);
+        if ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme())) {
+            return path;
+        }
+        if ("bmlocal".equalsIgnoreCase(uri.getScheme())) {
+            return BMWXEnvironment.loadBmLocal(getContext(), uri);
+        }
+        if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return path;
+        }
+        return INSIDE_URL;
+    }
 
     private String localPath(Uri uri) {
         String path = uri.getHost() + File.separator +
