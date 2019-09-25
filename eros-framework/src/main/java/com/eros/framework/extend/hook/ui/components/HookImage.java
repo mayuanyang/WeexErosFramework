@@ -274,16 +274,19 @@ public class HookImage extends WXComponent<ImageView> {
     @Override
     public void recycled() {
         super.recycled();
-        Glide.with(getHostView().getContext()).clear(getHostView());
-        if (getInstance().getImgLoaderAdapter() != null) {
-            getInstance().getImgLoaderAdapter().setImage(AUTORECYCLE_URL, getHostView(),
-                    null, null);
-        } else {
-            if (WXEnvironment.isApkDebugable()) {
-                throw new WXRuntimeException("getImgLoaderAdapter() == null");
+        if (getHostView() != null) {
+            Glide.with(getHostView().getContext()).clear(getHostView());
+            if (getInstance().getImgLoaderAdapter() != null) {
+                getInstance().getImgLoaderAdapter().setImage(AUTORECYCLE_URL, getHostView(),
+                        null, null);
+            } else {
+                if (WXEnvironment.isApkDebugable()) {
+                    throw new WXRuntimeException("getImgLoaderAdapter() == null");
+                }
+                WXLogUtils.e("Error getImgLoaderAdapter() == null");
             }
-            WXLogUtils.e("Error getImgLoaderAdapter() == null");
         }
+
     }
 
     public void autoReleaseImage() {
@@ -390,7 +393,7 @@ public class HookImage extends WXComponent<ImageView> {
     @Override
     protected void onFinishLayout() {
         super.onFinishLayout();
-        //校对borderRadius
+        //??borderRadius
         collateBorderRadius();
     }
 
