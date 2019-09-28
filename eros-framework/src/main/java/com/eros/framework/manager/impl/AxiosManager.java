@@ -55,6 +55,7 @@ import okhttp3.internal.http.HttpMethod;
 
 public class AxiosManager extends Manager {
     private static final String DEFAULT_MEDIATYPE = "application/json; charset=utf-8";
+    private static final String DEFAULT_MEDIATYPE_JSONP = "application/*+json";//Content-Type -> application/*+json
     private static final String DEFAULT_HOST = "http://app.weex-eros.com";
 
 
@@ -276,7 +277,11 @@ public class AxiosManager extends Manager {
             OkHttpUtils.postString().url(mUrl).content(data).mediaType(MediaType
                     .parse(contentType)).headers(header).tag(tag).build()
                     .execute(stringCallback);
-        } else {
+        }else if (contentType.equalsIgnoreCase(DEFAULT_MEDIATYPE_JSONP)){
+            OkHttpUtils.postString().url(mUrl).content(data).mediaType(MediaType
+                    .parse(contentType)).headers(header).tag(tag).build()
+                    .execute(stringCallback);
+        }else {
 
             ParseManager parseManager = ManagerFactory.getManagerService(ParseManager.class);
             HashMap params = parseManager.parseFetchParams(data);
