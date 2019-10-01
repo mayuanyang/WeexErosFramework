@@ -306,7 +306,10 @@ public class AbstractWeexActivity extends AppCompatActivity implements IWXRender
 
 
     public void hideError() {
-        rl_error.setVisibility(View.GONE);
+        if (rl_error!=null){
+            rl_error.setVisibility(View.GONE);
+        }
+
     }
 
     protected void initUrl(Intent data) {
