@@ -23,27 +23,17 @@ import com.eros.framework.utils.DebugableUtil;
 import com.eros.framework.utils.L;
 import com.eros.framework.utils.Md5Util;
 import com.eros.framework.utils.SharePreferenceUtil;
-import com.eros.framework.utils.TextUtil;
 import com.taobao.weex.adapter.IWXHttpAdapter;
 import com.taobao.weex.common.WXRequest;
 import com.taobao.weex.common.WXResponse;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.internal.http.HttpMethod;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
  * Created by Carry on 2017/8/7. interceptor for js resource
@@ -71,7 +61,12 @@ public class DefaultWXHttpAdapter implements IWXHttpAdapter {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         if (DebugableUtil.isDebug()) {
             builder.addNetworkInterceptor(new WeexOkhttp3Interceptor());
+
         }
+        HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+
+        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
+        builder.addInterceptor(httpLoggingInterceptor);
         client = builder.build();
     }
 
@@ -271,11 +266,11 @@ public class DefaultWXHttpAdapter implements IWXHttpAdapter {
 
             @Override
             public void onResponse(WXResponse wxResponse) {
-                if (isInterceptor(request.url)) {
+                //if (!isInterceptor(request.url)) {
                     if (listener != null) {
                         listener.onHttpFinish(wxResponse);
                     }
-                }
+               // }
             }
         });
     }

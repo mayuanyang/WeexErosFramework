@@ -6,8 +6,10 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.http.SslError;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.webkit.ConsoleMessage;
 import android.webkit.JsResult;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
@@ -229,7 +231,15 @@ public class BMWXWebView implements IWebView {
 
             @Override
             public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-                mContentHeight = Integer.parseInt(message);
+                try{
+                    Log.e("alert",message);
+                    mContentHeight = Integer.parseInt(message);
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+
                 mContentHeight = mContentHeight / (WXViewUtils.defaultPixelScaleFactor(getView().getContext()) * 2);
                 Map<String, String> params = new HashMap<>();
                 params.put("contentHeight", mContentHeight + "");
@@ -240,6 +250,12 @@ public class BMWXWebView implements IWebView {
                 return true;
             }
 
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                String message = consoleMessage.message();
+                Log.e("onConsoleMessage", ">>>>>>" + message);
+                return super.onConsoleMessage(consoleMessage);
+            }
         });
     }
 
